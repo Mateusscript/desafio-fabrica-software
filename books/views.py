@@ -11,6 +11,8 @@ class BookListAPIView(views.APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
+  
+     
     def post(self, request, *args, **kwargs):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
@@ -19,19 +21,24 @@ class BookListAPIView(views.APIView):
             response = requests.get(f'https://www.googleapis.com/books/v1/volumes?q={serializer.data["title"]}')
             data = response.json()
             
+            booksData = []
             for item in data['items']:
                 bookData = BookData(
                     book=serializer.instance,
                     title=item['volumeInfo']['title'],
                     author=item['volumeInfo']['authors'][0],
                     publisher=item['volumeInfo']['publisher'] if 'publisher' in item['volumeInfo'] else '',
-                    image_link=item['volumeInfo']['imageLinks']['thumbnail'] if 'publisher' in item['volumeInfo'] else '',
                     description=item['volumeInfo']['description'],
-                    info_link=item['volumeInfo']['infoLink']
+                    info_link=item['volumeInfo']['infoLink'],
+                    image_link=item['volumeInfo']['imageLinks']['thumbnail'] if 'publisher' in item['volumeInfo'] else ''
                 )
 
-                bookData.save()
+                booksDataSerializer = BooksDataSerializer(data=bookData._dict_)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if booksDataSerializer.is_valid():
+                    booksDataSerializer.save()
+        booksData.append(booksDataSerializer.data)
+
+        serializer.data["data"].extend(booksData)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
