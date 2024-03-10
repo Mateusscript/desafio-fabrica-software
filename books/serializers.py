@@ -11,3 +11,10 @@ class BooksDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookData
         fields = '__all__'
+
+class BookSerializer(serializers.ModelSerializer):
+    data = BooksDataSerializer(source='bookdata_set', many=True, required=False)
+
+    class Meta:
+        model = Book
+        fields = ['title', 'author', 'published_date', 'data']
