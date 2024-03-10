@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import status, views
 from rest_framework.response import Response
-from books.serializers import BookSerializer
+from books.serializers import BookSerializer, BooksDataSerializer
 from .models import Book, BookData
 import requests
 
@@ -11,8 +11,6 @@ class BookListAPIView(views.APIView):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data)
 
-  
-     
     def post(self, request, *args, **kwargs):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
@@ -33,12 +31,12 @@ class BookListAPIView(views.APIView):
                     image_link=item['volumeInfo']['imageLinks']['thumbnail'] if 'publisher' in item['volumeInfo'] else ''
                 )
 
-                booksDataSerializer = BooksDataSerializer(data=bookData._dict_)
+                booksDataSerializer = BooksDataSerializer(data=bookData.__dict__)
 
-        if booksDataSerializer.is_valid():
+                if booksDataSerializer.is_valid():
                     booksDataSerializer.save()
-        booksData.append(booksDataSerializer.data)
+                booksData.append(booksDataSerializer.data)
 
-        serializer.data["data"].extend(booksData)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.data["data"].extend(booksData)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
