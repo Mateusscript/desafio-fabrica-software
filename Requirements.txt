@@ -1,0 +1,5 @@
+- Requerido
+    - python 3.11
+    - requests
+    - django
+    - djangorestframework
