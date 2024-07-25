@@ -1,6 +1,6 @@
 # Desafio Fabrica de Software
 
-# Inicialização e Execução do projeto
+## Inicialização e Execução do projeto
 
 * Inicializar o env
     ```
